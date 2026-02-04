@@ -1,11 +1,14 @@
 import tkinter as tk
 import psutil
 import time
+import sys
 
 # ----------------------------
 # CONFIG
 # ----------------------------
 UPDATE_MS = 1000
+WINDOW_MIN_WIDTH = 470
+WINDOW_MIN_HEIGHT = 200
 
 CPU_WARN = 80.0
 RAM_WARN = 85.0
@@ -17,6 +20,10 @@ FG = "#e6e6e6"
 SUB = "#a9b1d6"
 WARN = "#f7768e"
 OK = "#9ece6a"
+
+IS_WINDOWS = sys.platform.startswith("win")
+TITLE_FONT = ("Segoe UI", 12, "bold") if IS_WINDOWS else ("DejaVu Sans", 12, "bold")
+TEXT_FONT = ("Consolas", 11) if IS_WINDOWS else ("DejaVu Sans Mono", 11)
 
 
 def bytes_to_gb(b): return b / (1024 ** 3)
@@ -32,12 +39,17 @@ class MiniMonitor:
         self.root = tk.Tk()
         self.root.title("Monitor")
         self.root.update_idletasks()
-        self.root.geometry(f"380x200+0+0")
+        self.root.geometry(f"{WINDOW_MIN_WIDTH}x{WINDOW_MIN_HEIGHT}+12+12")
         self.root.attributes("-topmost", True)
         self.root.configure(bg=BG)
-        self.root.overrideredirect(True)
-        self.root.bind("<ButtonPress-1>", self._start_move)
-        self.root.bind("<B1-Motion>", self._do_move)
+        if IS_WINDOWS:
+            # Borderless mode behaves well on native Windows.
+            self.root.overrideredirect(True)
+            self.root.bind("<ButtonPress-1>", self._start_move)
+            self.root.bind("<B1-Motion>", self._do_move)
+        else:
+            # On Linux/WSL, overrideredirect may clip text in some compositors/X servers.
+            self.root.resizable(False, False)
        
 
 
@@ -54,13 +66,13 @@ class MiniMonitor:
 
         self.title = tk.Label(
             self.frame, text="Recursos do Sistema",
-            fg=FG, bg=BG, font=("Segoe UI", 12, "bold")
+            fg=FG, bg=BG, font=TITLE_FONT
         )
         self.title.pack(anchor="w")
 
         self.hint = tk.Label(
             self.frame, text="Atualiza a cada 1s",
-            fg=SUB, bg=BG, font=("Segoe UI", 9)
+            fg=SUB, bg=BG, font=(TITLE_FONT[0], 9)
         )
         self.hint.pack(anchor="w", pady=(2, 10))
 
@@ -71,11 +83,27 @@ class MiniMonitor:
 
         self.status = tk.Label(
             self.frame, text="Status: OK",
-            fg=OK, bg=BG, font=("Segoe UI", 10, "bold")
+            fg=OK, bg=BG, font=(TITLE_FONT[0], 10, "bold")
         )
         self.status.pack(anchor="w", pady=(10, 0))
 
         self.update()
+
+    def _fit_to_content(self, force=False):
+        self.root.update_idletasks()
+
+        req_w = self.frame.winfo_reqwidth() + 28
+        req_h = self.frame.winfo_reqheight() + 24
+
+        target_w = max(WINDOW_MIN_WIDTH, req_w)
+        target_h = max(WINDOW_MIN_HEIGHT, req_h)
+
+        cur_w = self.root.winfo_width()
+        cur_h = self.root.winfo_height()
+
+        if force or target_w > cur_w or target_h > cur_h:
+            x, y = self.root.winfo_x(), self.root.winfo_y()
+            self.root.geometry(f"{target_w}x{target_h}+{x}+{y}")
 
     def _start_move(self, event):
         self._drag_x = event.x
@@ -92,7 +120,7 @@ class MiniMonitor:
             self.frame,
             text="--",
             fg=FG, bg=BG,
-            font=("Consolas", 11),
+            font=TEXT_FONT,
             anchor="w",
             justify="left"
         )
@@ -161,6 +189,7 @@ class MiniMonitor:
         else:
             self.status.config(text="Status: OK", fg=OK)
 
+        self._fit_to_content()
         self.root.after(UPDATE_MS, self.update)
 
     def run(self):
