@@ -4,7 +4,7 @@ Um mini monitor de recursos do sistema em janela flutuante, feito em Python com 
 
 ## Demonstração
 
-![Demonstração do app](assets/monitor.png)
+![Demonstração do app](assets/monitor_machine.png)
 
 ## O que ele mostra
 
