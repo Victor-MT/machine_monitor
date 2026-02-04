@@ -74,11 +74,7 @@ machine_monitor/
 ├── app.py
 ├── assets/
 │   └── monitor.png
-├── requiriments.txt
+├── requirements.txt
 ├── .gitignore
 └── README.md
 ```
-
-## Observações
-
-- O nome do arquivo de dependências está como `requiriments.txt` (com essa grafia), então mantenha esse nome nos comandos.
