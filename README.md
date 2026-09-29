@@ -4,7 +4,7 @@ Um mini monitor de recursos do sistema em janela flutuante, feito em Python com 
 
 ## Demonstração
 
-![Demonstração do app](assets/monitor_machine.png)
+![Demonstração do app](docs/monitor_machine.png)
 
 ## O que ele mostra
 
@@ -72,7 +72,7 @@ No arquivo `app.py`, você pode ajustar:
 ```text
 machine_monitor/
 ├── app.py
-├── assets/
+├── docs/
 │   └── monitor.png
 ├── requirements.txt
 ├── .gitignore
